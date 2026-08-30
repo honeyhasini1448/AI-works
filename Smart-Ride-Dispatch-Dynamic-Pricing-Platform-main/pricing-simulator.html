@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ride Matrix - Micro-Surge Engine</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col">
+    <nav class="border-b border-slate-800 bg-slate-950/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-500 p-2 rounded-lg text-slate-950"><i class="fa-solid fa-taxi"></i></div>
+                <span class="text-xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">Edge Dispatch Matrix</span>
+            </div>
+            <div class="flex items-center gap-6 text-sm">
+                <a href="index.html" class="text-slate-400 hover:text-slate-200 transition">Live Tracking</a>
+                <a href="pricing-simulator.html" class="text-amber-400 font-semibold border-b-2 border-amber-500 pb-1">Micro-Surge Engine</a>
+                <a href="driver-dispatch.html" class="text-slate-400 hover:text-slate-200 transition">Driver Telemetry</a>
+                <div id="surge-status" class="flex items-center gap-2 bg-rose-500/10 text-rose-400 px-3 py-1.5 rounded-full text-xs font-semibold border border-rose-500/20">
+                    <span class="h-2 w-2 rounded-full bg-rose-500 animate-ping"></span>Surge Pipes Offline
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8 space-y-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-black text-white">Demand Micro-Surge Analytics Engine</h1>
+                <p class="text-slate-400 text-xs mt-1">Monitor changing geographic traffic densities, view live request clusters, and calculate micro-surge multi-factor variables.</p>
+            </div>
+            <button id="btn-reset-surge" class="bg-rose-950/30 hover:bg-rose-900/30 border border-rose-800/60 text-rose-400 text-xs font-bold px-4 py-2.5 rounded-xl transition cursor-pointer"><i class="fa-solid fa-shuffle mr-2"></i>Reset Global Surge Parameters</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-slate-900/40 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+                <div class="p-4 border-b border-slate-800 bg-slate-950/20">
+                    <h3 class="font-bold text-xs tracking-wide uppercase text-slate-300"><i class="fa-solid fa-chart-area text-amber-400 mr-2"></i>Active Hot-Zone Tracking Matrix</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm font-mono">
+                        <thead>
+                            <tr class="border-b border-slate-800 bg-slate-950/40 text-slate-400 font-bold text-[11px] uppercase tracking-wider">
+                                <th class="p-4">Zone Cluster Token</th>
+                                <th class="p-4">Active Request Volume</th>
+                                <th class="p-4">Available Driver Volume</th>
+                                <th class="p-4">Surge Price Factor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="surge-table-body" class="divide-y divide-slate-800/50 text-xs">
+                            <tr>
+                                <td colspan="4" class="p-12 text-center text-slate-500 italic">No geographic hotspot markers calculated. Trigger ride requests in the tracking arena to populate data metrics...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                    <h3 class="text-xs uppercase tracking-wider font-bold text-slate-400 mb-3"><i class="fa-solid fa-satellite text-orange-400 mr-2"></i>Dynamic Surge Aggregator Log</h3>
+                    <div id="surge-ticker-terminal" class="h-60 bg-slate-950 border border-slate-900/60 rounded-xl p-4 font-mono text-xs text-slate-500 overflow-y-auto leading-relaxed italic">
+                        Surge calculator pipeline active. Awaiting asynchronous events from edge matching nodes...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+
+        const table = document.getElementById("surge-table-body");
+
+        async function loadPricing(){
+
+            const response = await fetch("http://localhost:5000/api/pricing");
+
+            const data = await response.json();
+
+            table.innerHTML = "";
+
+        data.forEach(zone=>{
+
+            table.innerHTML += `
+                <tr>
+                    <td class="p-4">${zone.zone}</td>
+                    <td class="p-4">${zone.requests}</td>
+                    <td class="p-4">${zone.drivers}</td>
+                    <td class="p-4">${zone.surge}x</td>
+                </tr>
+                `;
+
+        });
+
+        }
+
+        loadPricing();
+
+            document.getElementById("btn-reset-surge").addEventListener("click",async()=>{
+
+             await fetch("http://localhost:5000/api/pricing/reset",{
+
+                method:"POST"
+
+        });
+
+        loadPricing();
+
+        });
+    </script>
+</body>
+</html>

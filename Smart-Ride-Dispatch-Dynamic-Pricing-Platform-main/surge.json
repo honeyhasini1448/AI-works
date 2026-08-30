@@ -1,0 +1,14 @@
+[
+    {
+        "zone": "A1",
+        "requests": 0,
+        "drivers": 10,
+        "surge": 1
+    },
+    {
+        "zone": "B2",
+        "requests": 0,
+        "drivers": 10,
+        "surge": 1
+    }
+]

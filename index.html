@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ride Matrix - Live Tracking Arena</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col">
+    <nav class="border-b border-slate-800 bg-slate-950/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-500 p-2 rounded-lg text-slate-950"><i class="fa-solid fa-taxi"></i></div>
+                <span class="text-xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">Edge Dispatch Matrix</span>
+            </div>
+            <div class="flex items-center gap-6 text-sm">
+                <a href="index.html" class="text-amber-400 font-semibold border-b-2 border-amber-500 pb-1">Live Tracking</a>
+                <a href="pricing-simulator.html" class="text-slate-400 hover:text-slate-200 transition">Micro-Surge Engine</a>
+                <a href="driver-dispatch.html" class="text-slate-400 hover:text-slate-200 transition">Driver Telemetry</a>
+                <div id="tracking-status" class="flex items-center gap-2 bg-rose-500/10 text-rose-400 px-3 py-1.5 rounded-full text-xs font-semibold border border-rose-500/20">
+                    <span class="h-2 w-2 rounded-full bg-rose-500 animate-ping"></span>Telemetry Offline
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <aside class="space-y-4">
+            <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <h3 class="text-xs uppercase tracking-wider font-bold text-slate-400 mb-3">Book Ride Core Session</h3>
+                <div class="space-y-3">
+                    <div>
+                        <input type="text" id="txt-pickup" placeholder="Pickup Location Coordinate" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-amber-500 mb-2">
+                        <input type="text" id="txt-drop" placeholder="Drop Location Coordinate" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-amber-500 mb-2">
+                        <select id="select-vehicle" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-300 focus:outline-none focus:border-amber-500 mb-2">
+                            <option value="MINI">Mini Tier Space</option>
+                            <option value="SEDAN">Sedan Fleet Line</option>
+                            <option value="SUV">SUV Command Block</option>
+                            <option value="LUXURY">Luxury Cluster Pass</option>
+                        </select>
+                    </div>
+                    <label class="flex items-center gap-2 text-xs text-slate-400 font-mono">
+                        <input type="checkbox" id="chk-pooling" class="accent-amber-500"> Enable Shared Pooling Vectors
+                    </label>
+                    <button id="btn-request-ride" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs py-2.5 rounded-xl transition cursor-pointer uppercase tracking-wider">Request Telemetry Ride</button>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <h3 class="text-xs uppercase tracking-wider font-bold text-slate-400 mb-2">Real-Time Prediction Log</h3>
+                <div class="bg-slate-950 border border-slate-900 p-3 rounded-xl font-mono text-xs space-y-1">
+                    <div class="flex justify-between"><span class="text-slate-500">Predicted Fare:</span><span id="predicted-fare" class="text-amber-400 font-bold">₹0.00</span></div>
+                    <div class="text-[10px] text-slate-600 italic">Surge scales computed automatically based on spatial zone densities.</div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="lg:col-span-3 flex flex-col space-y-4">
+            <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 shadow-2xl flex items-center justify-between">
+                <div>
+                    <h2 class="font-bold text-white text-base">Geospatial Ride Tracking Stream</h2>
+                    <p class="text-[10px] text-slate-500 font-mono mt-0.5">Active Target Tracking Session UUID: <span id="active-ride-id" class="text-amber-400 font-bold">None</span></p>
+                </div>
+                <span id="badge-journey-state" class="bg-slate-950 border border-slate-800 text-slate-500 text-[10px] font-mono font-bold px-3 py-1 rounded-md uppercase tracking-wider">STANDBY LAYER</span>
+            </div>
+
+            <div class="flex-1 relative min-h-[22rem] bg-slate-950 border border-slate-800 rounded-2xl shadow-inner overflow-hidden flex flex-col justify-center items-center p-6">
+                <div id="map-vector-canvas" class="text-center font-mono text-xs text-slate-600 italic space-y-2">
+                    <i class="fa-solid fa-map-location-dot text-4xl text-slate-800 animate-pulse block"></i>
+                    <span>Awaiting dynamic pipeline connection. Initialize an operational route session vector from the left console pane to draw map paths...</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-4">
+                <h3 class="text-xs uppercase tracking-wider font-bold text-slate-400 mb-3"><i class="fa-solid fa-ellipsis-nodes text-amber-400 mr-2"></i>Journey Micro-Step State Pipeline</h3>
+                <div id="pipeline-steps-layout" class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-center font-mono text-[10px] font-bold text-slate-600">
+                    <div class="p-2.5 bg-slate-950 border border-slate-900 rounded-xl" data-step="REQUESTED">REQUESTED</div>
+                    <div class="p-2.5 bg-slate-950 border border-slate-900 rounded-xl" data-step="DRIVER_ASSIGNED">DRIVER ASSIGNED</div>
+                    <div class="p-2.5 bg-slate-950 border border-slate-900 rounded-xl" data-step="DRIVER_ARRIVING">DRIVER ARRIVING</div>
+                    <div class="p-2.5 bg-slate-950 border border-slate-900 rounded-xl" data-step="STARTED">STARTED</div>
+                    <div class="p-2.5 bg-slate-950 border border-slate-900 rounded-xl" data-step="COMPLETED">COMPLETED</div>
+                    <div class="p-2.5 bg-slate-950 border border-slate-900 rounded-xl" data-step="CANCELLED">CANCELLED</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+
+const pickup = document.getElementById("txt-pickup");
+const drop = document.getElementById("txt-drop");
+const vehicle = document.getElementById("select-vehicle");
+const pooling = document.getElementById("chk-pooling");
+const button = document.getElementById("btn-request-ride");
+
+const fare = document.getElementById("predicted-fare");
+const rideId = document.getElementById("active-ride-id");
+const badge = document.getElementById("badge-journey-state");
+
+button.addEventListener("click", async () => {
+
+    const response = await fetch("http://localhost:5000/api/ride/book", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type":"application/json"
+        },
+
+        body: JSON.stringify({
+
+            pickup: pickup.value,
+            drop: drop.value,
+            vehicleType: vehicle.value,
+            pooling: pooling.checked
+
+        })
+
+    });
+
+    const data = await response.json();
+
+    console.log(data);
+
+    alert("Ride Booked Successfully!");
+
+    setTimeout(() => {
+        fare.innerHTML = "₹" + data.ride.fare;
+        rideId.innerHTML = data.ride.id;
+        badge.innerHTML = data.ride.status;
+    }, 100);
+
+});
+
+</script>
+
+</body>
+</html>
